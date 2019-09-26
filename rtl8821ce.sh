@@ -5,7 +5,6 @@
 
 PREDIR=/var/tmp
 STAGEDIR=/var/tmp/rtl8821ce
-topDIR=$STAGEDIR
 DRIVERSRC="https://github.com/tomaspinho/rtl8821ce"
 PKGLIST="openssl kernel-devel perl mokutil keyutils dkms"
 CHKPKGS=$(printf "$PKGLIST" | sed -e "s/ /-\[0-9\]\|\^/g")
@@ -23,7 +22,7 @@ BUSADDRESS=$(lspci | grep -i $DRIVERMODULE | awk '{ print $1 }')
 ###########################################################################
 
 printf "\nChecking if required software is installed ...\n"
-if [ $(rpm -qa | grep -iE "$CHKPKGS" | wc -l) -eq 6 ]
+if [ $(rpm -qa | grep -iE "$CHKPKGS" | wc -l) -eq 7 ]
 then
    printf "Required software is installed.\n\n"
 else
@@ -152,12 +151,12 @@ fi
 # Compile the rtl8821ce driver.                                           #
 ###########################################################################
 
-if [ -f "$STAGEDIR/$DRIVERMODULE.ko" ]
+if [ -f "$MODULEPATH/$DRIVERMODULE.ko.xz" ]
 then
    printf "Driver module is already compiled.\n\n"
 else
    printf "Compiling RTL8821CE driver module\n"
-   make M=$STAGEDIR
+   $STAGEDIR/dkms-install.sh
 fi
 
 
@@ -165,25 +164,40 @@ fi
 # Sign the rtl8821ce driver wih the private & public key pair.            #
 ###########################################################################
 
-if [ "x$EMAIL" == "x" ]
+printf "Checking to see if $DRIVERMODULE driver is signed.\n"
+if [ $(modinfo $DRIVERMODULE 2>/dev/null| grep -i "^signer:" | wc -l ) -gt 0 ]
 then
-   EMAIL=$(grep -i emailaddress $CONFFILE | awk -F'"' '{ print $2 }')
-fi
-if [ $(strings $DRIVERMODULE.ko | grep -i $EMAIL | wc -l ) -gt 0 ]
-then
-   printf "Driver Module $DRIVERMODULE is already signed.\n\n"
+   printf "Driver $DRIVERMODULE is already signed.\n\n"
 else
-   /usr/src/kernels/$(uname -r)/scripts/sign-file sha256 $PRIVATEKEYFILE $PUBLICKEYFILE $STAGEDIR/$DRIVERMODULE.ko
-   if [ -f "$STAGEDIR/DRIVERMODULE.ko" ]
+   printf "Driver is not signed.  Proceeding ... \n"
+   xz -d $MODULEPATH/$DRIVERMODULE.ko.xz
+   /usr/src/kernels/$(uname -r)/scripts/sign-file sha256 $PRIVATEKEYFILE $PUBLICKEYFILE $MODULEPATH/$DRIVERMODULE.ko
+   RC=$?
+   if [ $RC -eq 0 ]
    then
-      xz -z $STAGEDIR/$DRIVERMODULE.ko
-   fi
-   cp -p $STAGEDIR/$DRIVERMODULE.ko.xz $MODULEPATH
-   if [ $(modinfo $DRIVERMODULE | grep -i signer | wc -l ) -gt 0 ]
-   then
-      printf "Driver Module $DRIVERMODULE has been successfully signed.\n\n"
+      printf "The $DRIVERMODULE driver has been successfully signed.\n\n"
+      xz -z $MODULEPATH/$DRIVERMODULE.ko
+   else
+      printf "ERROR:  The $DRIVERMODULE failed signing process.\n"
+      printf "        Please investigate.\n\n"
+      exit
    fi
 fi
+
+
+###########################################################################
+# Compress compiled module & move into the Module's destination.          #
+###########################################################################
+#printf "Compress compiled module & copy it to $MODULEPATH\n\n"
+#if [ -f "$STAGEDIR/$DRIVERMODULE.ko" ]
+#then
+#   xz $STAGEDIR/$DRIVERMODULE.ko
+#fi
+#cp -p $STAGEDIR/$DRIVERMODULE.ko.xz $MODULEPATH
+#if [ $(modinfo $DRIVERMODULE | grep -i signer | wc -l ) -gt 0 ]
+#then
+#   printf "Driver Module $DRIVERMODULE has been successfully signed.\n\n"
+#fi
 
 
 ###########################################################################
