@@ -5,6 +5,7 @@
 
 PREDIR=/var/tmp
 STAGEDIR=/var/tmp/rtl8821ce
+topDIR=$STAGEDIR
 DRIVERSRC="https://github.com/tomaspinho/rtl8821ce"
 PKGLIST="openssl kernel-devel perl mokutil keyutils dkms"
 CHKPKGS=$(printf "$PKGLIST" | sed -e "s/ /-\[0-9\]\|\^/g")
@@ -150,6 +151,7 @@ fi
 ###########################################################################
 # Compile the rtl8821ce driver.                                           #
 ###########################################################################
+
 if [ -f "$STAGEDIR/$DRIVERMODULE.ko" ]
 then
    printf "Driver module is already compiled.\n\n"
