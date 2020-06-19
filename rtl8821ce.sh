@@ -6,7 +6,7 @@
 PREDIR=/var/tmp
 STAGEDIR=/var/tmp/rtl8821ce
 DRIVERSRC="https://github.com/tomaspinho/rtl8821ce"
-PKGLIST="openssl kernel-devel-$(unme -r) perl mokutil keyutils dkms"
+PKGLIST="openssl kernel-devel-$(uname -r) perl mokutil keyutils dkms"
 CHKPKGS=$(printf "$PKGLIST" | sed -e "s/ /-\[0-9\]\|\^/g")
 CHKPKGS="^$CHKPKGS-[0-9]"
 CONFFILE=/etc/x509.conf
@@ -27,7 +27,7 @@ then
    printf "Required software is installed.\n\n"
 else
    printf "Required software is not installed.  Proceeding with install ...\n\n"
-   dnf -y install $PKGLIST
+#   dnf -y install $PKGLIST
    RC=$?
    if [ $RC -eq 0 ]
    then
