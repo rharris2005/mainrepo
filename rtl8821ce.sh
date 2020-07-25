@@ -6,9 +6,9 @@
 PREDIR=/var/tmp
 STAGEDIR=/var/tmp/rtl8821ce
 DRIVERSRC="https://github.com/tomaspinho/rtl8821ce"
-PKGLIST="openssl kernel-devel-$(uname -r) perl mokutil keyutils dkms"
+PKGLIST="git openssl perl mokutil keyutils dkms kernel-devel-$(uname -r)"
 CHKPKGS=$(printf "$PKGLIST" | sed -e "s/ /-\[0-9\]\|\^/g")
-CHKPKGS="^$CHKPKGS-[0-9]"
+CHKPKGS="^$CHKPKGS"
 CONFFILE=/etc/x509.conf
 PUBLICKEYFILE=/etc/x509.public.der
 PRIVATEKEYFILE=/etc/x509.private.der
@@ -27,7 +27,7 @@ then
    printf "Required software is installed.\n\n"
 else
    printf "Required software is not installed.  Proceeding with install ...\n\n"
-#   dnf -y install $PKGLIST
+   dnf -y install $PKGLIST
    RC=$?
    if [ $RC -eq 0 ]
    then
@@ -67,10 +67,11 @@ fi
 ###########################################################################
 
 printf "Checking if RTL8821CE driver source code is downloaded ...\n"
-if [ -f $STAGEDIR/rtl8821c.mk ]
+if [ -e $STAGEDIR/rtl8821c.mk ]
 then
    printf "RTL8821CE driver source code is already downloaded.\n\n"
 else
+   /bin/rm -rf $STAGEDIR
    printf "RTL8821CE driver source code is not downloaded yet ... Proceeding.\n\n"
    cd $PREDIR
    git clone $DRIVERSRC
