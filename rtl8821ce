@@ -1,0 +1,22 @@
+#!/bin/bash
+if [[ -e /lib/modules/$(uname -r)/extra/8821ce.ko.xz ]] && [[ $(lsmod | grep -i 8821ce | wc -l) -gt 0 ]]
+then
+   printf "The rtl8821ce driver already exists & is loaded for this kernel\n\n"
+else
+   printf "The rtl8821ce driver needs to be loaded for this kernel-$(uname -r) ... proceeding\n\n"
+   /var/tmp/mainrepo/rtl8821ce.sh
+   if [ $? -eq 0 ]
+   then
+      if [[ -e /lib/modules/$(uname -r)/extra/8821ce.ko.xz ]] && [[ $(lsmod | grep -i 8821ce | wc -l) -gt 0 ]]
+      then
+         printf "The rtl8821ce driver load was successful! \n\n"
+         exit 0
+      else
+         printf "ERROR:  Something went wrong.  The 8821ce module still is not loaded for kernel-$(uname -r)!! n\n"
+         exit 8
+      fi
+   else
+      printf "FAILURE:  The rtl8821ce driver load failed!!! \n\n"
+      exit 16
+   fi
+fi
