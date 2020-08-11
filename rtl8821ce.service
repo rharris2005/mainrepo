@@ -1,11 +1,12 @@
 [Unit]
 Description=Service to load rtl8821ce wireless network driver when kernel version changes
-After=network-online.target
+Before=sshd.service
+After=systemd-sysctl.service systemd-modules-load.service
 
 [Service]
 Type=oneshot
 Restart=no
-ExecStart=/etc/init.d/rtl8821ce
+ExecStart=/usr/sbin/rtl8821ce
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=network-online.target
