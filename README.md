@@ -10,4 +10,4 @@ Place the rtl8821ce.service file in /etc/systemd/system.  Then place the rtl8821
      semodule -X 300 -i my-rtl8821cesh.pp
      systemctl enable rtl8821ce
 
-Once the above commands have been run you should be good.  Whent the rtl8821ce service starts, it will run /etc/init.d/rtl8821ce which will check to see if /lib/moodules/$(uname -r)/extra/8821ce.ko.xz exists and also see if the module 8821ce is loaded.  If it is then it will exit clean.  If either condition fails, then it will run /var/tmp/mainrepo/rtl8821ce.sh which will check everything that has to be done to create the module & load it.
+Once the above commands have been run you should be good.  When the rtl8821ce service starts, it will run /usr/sbin/rtl8821ce which will check to see if /lib/moodules/$(uname -r)/extra/8821ce.ko.xz exists and also see if the module 8821ce is loaded.  If it is then it will exit clean.  If either condition fails, then it will run /var/tmp/mainrepo/rtl8821ce.sh which will check everything that has to be done to create the module & load it.  Needless to say the rtl8821ce script should be placed in /usr/sbin.
